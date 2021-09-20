@@ -2,6 +2,8 @@ pipeline {
 
     environment {
         JAVA_TOOL_OPTIONS = "-Duser.home=/var/maven"
+        registry = "horaciocrespo/obo"
+        dockerImage = ''
     }
 
     agent {
@@ -46,21 +48,37 @@ pipeline {
             }
         }
 
-        stage("Create docker image") {
+        stage("Build docker image") {
             steps {
-                echo "create docker image..."
+                script {
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                }
             }
         }
 
-        stage("Deploy image to artifactory, nexus or Docker Hub") {
+        stage("Push image to Docker Hub") {
+            environment {
+                DOCKER_HUB_LOGIN = credentials('docker-hub')
+            }
             steps {
-                echo "Deploying to artifactory, nexus or Docker Hub"
+                // sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW'
+                script {
+                    docker.withRegistry('', 'docker-hub') {
+                        dockerImage.push()
+                    }
+                }
             }
         }
 
         stage("Run container on EC2") {
             steps {
                 echo "Deploying to EC2..."
+            }
+        }
+
+        stage("Clean up") {
+            steps {
+                sh "docker rmi $registry:$BUILD_NUMBER"
             }
         }
     }
