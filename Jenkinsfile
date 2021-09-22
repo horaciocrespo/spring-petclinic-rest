@@ -6,13 +6,7 @@ pipeline {
         dockerImage = ''
     }
 
-    agent {
-        docker {
-            image "maven:3.3.3"
-            // use local .m2 repo
-            args "-v /tmp/maven:/var/maven/.m2 -e  MAVEN_CONFIG=/var/maven/.m2"
-        }
-    }
+    agent none
 
     stages {
 
@@ -30,25 +24,37 @@ pipeline {
         // }
 
         stage("Build") {
+
+            agent {
+                docker {
+                    image "maven:3.3.3"
+                    // use local .m2 repo
+                    args "-v /tmp/maven:/var/maven/.m2 -e  MAVEN_CONFIG=/var/maven/.m2"
+                }
+            }
+
             steps {
                 sh "mvn clean compile"
             }
         }
 
-        stage("Unit Tests") {
-            steps {
-                sh "mvn test"
-            }
+        // stage("Unit Tests") {
+        //     steps {
+        //         sh "mvn test"
+        //     }
 
-            // publish report
-            post {
-                always {
-                    junit "**/target/surefire-reports/TEST-*.xml"
-                }
-            }
-        }
+        //     // publish report
+        //     post {
+        //         always {
+        //             junit "**/target/surefire-reports/TEST-*.xml"
+        //         }
+        //     }
+        // }
 
         stage("Build docker image") {
+
+            agent any
+
             steps {
                 script {
                     dockerImage = docker.build registry + ":$BUILD_NUMBER" 
@@ -57,9 +63,13 @@ pipeline {
         }
 
         stage("Push image to Docker Hub") {
+
             environment {
                 DOCKER_HUB_LOGIN = credentials('docker-hub')
             }
+
+            agent any
+            
             steps {
                 // sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW'
                 script {
