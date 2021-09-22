@@ -90,6 +90,9 @@ pipeline {
         }
 
         stage("Clean up") {
+
+            agent any
+
             steps {
                 sh "docker rmi $registry:$BUILD_NUMBER"
             }
@@ -98,9 +101,9 @@ pipeline {
 
     post {
         always {
-            node('master') {
+            // node('master') {
                 cleanWs()
-            }
+            // }
         }
     }
 }
