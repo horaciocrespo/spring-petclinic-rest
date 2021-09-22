@@ -34,6 +34,7 @@ pipeline {
             }
 
             steps {
+                echo "${env.NODE_NAME}"
                 sh "mvn clean compile"
             }
         }
@@ -56,6 +57,7 @@ pipeline {
             agent any
 
             steps {
+                echo "${env.NODE_NAME}"
                 script {
                     dockerImage = docker.build registry + ":$BUILD_NUMBER" 
                 }
@@ -71,6 +73,7 @@ pipeline {
             agent any
             
             steps {
+                // sh "whoami"
                 // sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW'
                 script {
                     docker.withRegistry('', 'docker-hub') {
@@ -95,7 +98,9 @@ pipeline {
 
     post {
         always {
-            cleanWs()
+            node('master') {
+                cleanWs()
+            }
         }
     }
 }
