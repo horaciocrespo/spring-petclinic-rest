@@ -101,9 +101,9 @@ pipeline {
 
     post {
         always {
-            // node('master') {
+            node('master') {
                 cleanWs()
-            // }
+            }
         }
     }
 }
