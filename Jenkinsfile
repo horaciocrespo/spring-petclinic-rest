@@ -102,9 +102,14 @@ pipeline {
     post {
         always {
             node('master') {
-                emailext body: "${env.DEFAULT_CONTENT}",
-                recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
-                subject: "${env.DEFAULT_SUBJECT}"
+                emailext subject: '$DEFAULT_SUBJECT',
+                body: '$DEFAULT_CONTENT',
+                recipientProviders: [
+                    [$class: 'DevelopersRecipientProvider'],
+                    [$class: 'RequesterRecipientProvider']
+                ],
+                replyTo: '$DEFAULT_REPLYTO',
+                to: '$DEFAULT_RECIPIENTS'
                 cleanWs()
             }
         }
