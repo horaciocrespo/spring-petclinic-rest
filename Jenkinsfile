@@ -102,9 +102,9 @@ pipeline {
     post {
         always {
             node('master') {
-                emailext body: "$DEFAULT_CONTENT",
+                emailext body: "${env.DEFAULT_CONTENT}",
                 recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']],
-                subject: "$DEFAULT_SUBJECT"
+                subject: "${env.DEFAULT_SUBJECT}"
                 cleanWs()
             }
         }
